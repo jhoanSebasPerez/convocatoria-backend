@@ -14,10 +14,147 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  fullname  String?
-  password  String
+  id                 String       @id @default(cuid())
+  email              String       @unique
+  fullname           String?
+  roles              String[]     @default(["ESTUDIANTE"])
+  isActive           Boolean      @default(true)
+  password           String?
+  accessToken        String?      @unique
+  accessTokenExpires DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  proyectos          Proyecto[]
+  evaluaciones       Evaluacion[]
+}
+
+model Convocatoria {
+  id          String   @id @default(cuid())
+  titulo      String
+  descripcion String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  isActive    Boolean  @default(true)
+
+  proyectos Proyecto[]
+
+  rubricaId String?  @unique
+  rubrica   Rubrica? @relation(fields: [rubricaId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Rubrica {
+  id            String         @id @default(cuid())
+  nombre        String         @unique
+  descripcion   String
+  criterios     Criterio[]
+  convocatorias Convocatoria[]
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  Evaluacion Evaluacion[]
+}
+
+model Criterio {
+  id          String    @id @default(cuid())
+  nombre      String    @unique
+  puntajeMax  Int
+  puntajeMin  Int
+  descripcion String
+  rubricas    Rubrica[]
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  EvaluacionCriterio EvaluacionCriterio[]
+}
+
+model Proyecto {
+  id              String       @id @default(cuid())
+  titulo          String
+  resumen         String
+  convocatoria    Convocatoria @relation(fields: [convocatoriaId], references: [id])
+  convocatoriaId  String
+  tiempoEjecucion Int
+  fechaInicio     DateTime
+  fechaFin        DateTime
+  estudiantes     User[]
+
+  proyectoAula   ProyectoAula?
+  proyectoAulaId String?       @unique
+
+  proyectoSemillero   ProyectoSemillero?
+  proyectoSemilleroId String?            @unique
+
+  documentoUrl String?
+  filename     String?
+
+  evaluacion  Evaluacion?
+  evaluadorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProyectoAula {
+  id                    String           @id @default(cuid())
+  curso                 String
+  docenteOrientador     String
+  estadoFormulacion     String
+  estadoEjecucion       String
+  estadoTerminado       String
+  categoria             TipoProyectoAula @default(INTEGRADOR)
+  modalidadPresentacion String           @default("POSTER")
+  proyecto              Proyecto?        @relation(fields: [proyectoId], references: [id])
+  proyectoId            String?          @unique
+}
+
+model ProyectoSemillero {
+  id                    String    @id @default(cuid())
+  nombreSemillero       String
+  siglaSemillero        String
+  directorSemillero     String
+  modalidadPresentacion String    @default("ORAL")
+  proyecto              Proyecto? @relation(fields: [proyectoId], references: [id])
+  proyectoId            String?   @unique
+}
+
+enum TipoProyectoAula {
+  INNOVACION
+  EMPRENDIMIENTO
+  APRENDIZAJE_AULA
+  INTEGRADOR
+}
+
+model Evaluacion {
+  id              String   @id @default(cuid())
+  proyecto        Proyecto @relation(fields: [proyectoId], references: [id])
+  proyectoId      String   @unique
+  rubrica         Rubrica  @relation(fields: [rubricaId], references: [id])
+  rubricaId       String
+  puntajeTotal    Int
+  observaciones   String?
+  fechaEvaluacion DateTime @default(now())
+
+  criteriosEvaluacion EvaluacionCriterio[]
+
+  evaluador   User   @relation(fields: [evaluadorId], references: [id])
+  evaluadorId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EvaluacionCriterio {
+  id           String     @id @default(cuid())
+  evaluacion   Evaluacion @relation(fields: [evaluacionId], references: [id])
+  evaluacionId String
+  criterio     Criterio   @relation(fields: [criterioId], references: [id])
+  criterioId   String
+  puntaje      Int
+  comentario   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

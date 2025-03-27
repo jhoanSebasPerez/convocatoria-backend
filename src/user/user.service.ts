@@ -1,19 +1,24 @@
 import * as bcrypt from 'bcrypt';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { NotificationService } from 'src/notificaciones/notificaciones.service';
+import { AuthService } from 'src/auth/auth.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
 
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly notificacionesService: NotificationService,
+    private readonly authService: AuthService,
   ) { }
 
   async createUser(createUserDto: CreateUserDto) {
     try {
-      return await this.prismaService.user.create({
+      await this.prismaService.user.create({
         data: {
           ...createUserDto,
           password: await bcrypt.hash(createUserDto.password, 10),
@@ -24,6 +29,7 @@ export class UserService {
           fullname: true,
         },
       });
+
     } catch (error) {
       console.error("🔥 Prisma error:", error); // 👀 Log para debug
 
@@ -35,10 +41,131 @@ export class UserService {
       // Manejar otros errores inesperados
       throw new BadRequestException('Error creating user');
     }
+
   }
 
   async getUser(filter: Prisma.UserWhereUniqueInput) {
     return this.prismaService.user.findUnique({ where: filter });
+  }
+
+  async getUsers() {
+    return this.prismaService.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        fullname: true,
+        roles: true,
+      },
+    });
+  }
+
+  async getDocentes() {
+    return this.prismaService.user.findMany({
+      where: {
+        roles: {
+          has: 'DOCENTE',
+        },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        fullname: true,
+        roles: true,
+      },
+    });
+  }
+
+  async createDocente(email: string, fullname: string) {
+    // 🔹 Verificar si el usuario ya existe
+
+    const existingUser = await this.prismaService.user.findUnique({ where: { email } });
+    if (existingUser) {
+      throw new BadRequestException('El usuario ya existe.');
+    }
+
+    // 🔹 Crear el usuario en la base de datos
+    const newUser = await this.prismaService.user.create({
+      data: {
+        email,
+        fullname,
+        roles: ['DOCENTE'],
+        isActive: false,
+      },
+    });
+
+    const { token, expires } = await this.authService.login(newUser);
+
+    await this.prismaService.user.update({
+      where: { id: newUser.id },
+      data: {
+        accessToken: token,
+        accessTokenExpires: expires,
+      },
+    });
+
+    //send email notification to docente
+    this.notificacionesService.enviarEmailCreacionDocente(token, newUser);
+
+    return { success: true, mensaje: 'Docente creado exitosamente' };
+  }
+
+  async activateDocente(activationToken: string, password: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        accessToken: activationToken
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Token inválido.');
+    }
+
+    if (user.accessToken && user.accessTokenExpires && new Date() > user.accessTokenExpires) {
+      throw new BadRequestException('El token ha expirado. Solicita un nuevo enlace de activación.');
+    }
+
+    // 🔹 Actualizar usuario y activar cuenta
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        isActive: true,
+        password: await bcrypt.hash(password, 10),
+        accessToken: null,
+        accessTokenExpires: null,
+      },
+    });
+
+    return { message: 'Cuenta activada con éxito.' };
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: updateUserDto,
+      select: { id: true, email: true, fullname: true, roles: true }
+    });
+  }
+
+  async changePassword(userId: string, newPassword: string) {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 
 }
