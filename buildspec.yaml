@@ -13,4 +13,6 @@ phases:
 artifacts:
   files:
     - '**/*'
-  base-directory: dist
+
+
+
