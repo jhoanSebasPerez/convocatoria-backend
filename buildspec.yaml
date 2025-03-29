@@ -6,26 +6,23 @@ phases:
       nodejs: latest
     commands:
       - npm install -g pnpm
-      - if [ ! -f pnpm-lock.yaml ]; then echo "⚠️ pnpm-lock.yaml no encontrado, generando..."; pnpm install --no-frozen-lockfile; fi
-      - pnpm install --frozen-lockfile
+      - pnpm install --no-frozen-lockfile
 
   build:
     commands:
-      - pnpm prisma generate
-      - pnpm build
+      - pnpm prisma generate  # Genera los clientes de Prisma
+      - pnpm build  # Compila el código de NestJS
 
   post_build:
     commands:
-      - echo "📦 Preparando artefactos para despliegue..."
-      - mkdir -p deploy
-      - if [ -d dist ]; then cp -r dist deploy/; fi
-      - if [ -d prisma ]; then cp -r prisma deploy/; fi
-      - if [ -d node_modules ]; then cp -r node_modules deploy/; fi
-      - if [ -f package.json ]; then cp package.json deploy/; fi
-      - if [ -f pnpm-lock.yaml ]; then cp pnpm-lock.yaml deploy/; fi
-      - if [ -f Procfile ]; then cp Procfile deploy/; fi
-      - cd deploy && zip -r ../deploy.zip . && cd ..
+      - echo "Build completo. Preparando archivos para despliegue."
+      - ls -la dist
 
 artifacts:
   files:
-    - deploy.zip
+    - 'dist/**'
+    - 'prisma/**'
+    - 'node_modules/**'
+    - 'package.json'
+    - 'pnpm-lock.yaml'
+    - 'Procfile'
