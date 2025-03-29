@@ -25,6 +25,10 @@ async function bootstrap() {
     transform: true,
   }));
   app.use(cookieParser());
-  await app.listen(app.get(ConfigService).getOrThrow('PORT'));
+  const configService = app.get(ConfigService);
+  const PORT = configService.get<number>('PORT') || 8080;
+  await app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 }
 bootstrap();
