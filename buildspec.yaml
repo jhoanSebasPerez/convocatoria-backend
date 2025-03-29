@@ -18,7 +18,12 @@ phases:
     commands:
       - echo "📦 Preparando artefactos para despliegue..."
       - mkdir -p deploy
-      - cp -r dist prisma node_modules package.json pnpm-lock.yaml Procfile deploy/
+      - if [ -d dist ]; then cp -r dist deploy/; fi
+      - if [ -d prisma ]; then cp -r prisma deploy/; fi
+      - if [ -d node_modules ]; then cp -r node_modules deploy/; fi
+      - if [ -f package.json ]; then cp package.json deploy/; fi
+      - if [ -f pnpm-lock.yaml ]; then cp pnpm-lock.yaml deploy/; fi
+      - if [ -f Procfile ]; then cp Procfile deploy/; fi
       - cd deploy && zip -r ../deploy.zip . && cd ..
 
 artifacts:
