@@ -1,15 +1,22 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
-      nodejs: latest
+      nodejs: 20
     commands:
       - npm install -g pnpm
-      - pnpm install
+      - pnpm fetch
+      - pnpm install --offline
+
   build:
     commands:
       - pnpm prisma generate
+      - pnpm prisma migrate deploy
       - pnpm build
+
 artifacts:
   files:
-    - '**/*'
+    - dist/**/*
+    - package.json
+    - pnpm-lock.yaml
