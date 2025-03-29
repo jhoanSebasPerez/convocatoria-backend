@@ -1,15 +1,25 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
       nodejs: latest
     commands:
       - npm install -g pnpm
-      - pnpm install
+      - pnpm install --frozen-lockfile
+
   build:
     commands:
       - pnpm prisma generate
       - pnpm build
+
+  post_build:
+    commands:
+      - echo "Preparing deployment..."
+      - mkdir -p deploy
+      - cp -r dist prisma node_modules package.json pnpm-lock.yaml Procfile deploy/
+      - cd deploy && zip -r ../deploy.zip . && cd ..
+
 artifacts:
   files:
-    - '**/*'
+    - deploy.zip
