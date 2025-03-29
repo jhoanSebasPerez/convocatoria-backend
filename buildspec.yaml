@@ -10,9 +10,6 @@ phases:
     commands:
       - pnpm prisma generate
       - pnpm build
-  post_build:
-    commands:
-      - pnpm start:prod
 artifacts:
   files:
     - '**/*'

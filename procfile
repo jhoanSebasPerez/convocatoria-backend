@@ -1,1 +1,1 @@
-web: sh -c "pnpm prisma migrate deploy && pnpm start:prod"
+web: node dist/main.js
