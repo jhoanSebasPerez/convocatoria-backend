@@ -12,6 +12,7 @@ phases:
   build:
     commands:
       - pnpm prisma generate
+      - pnpm prisma db push
       - pnpm prisma migrate deploy
       - pnpm build
 
