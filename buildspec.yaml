@@ -6,6 +6,7 @@ phases:
       nodejs: latest
     commands:
       - npm install -g pnpm
+      - if [ ! -f pnpm-lock.yaml ]; then echo "⚠️ pnpm-lock.yaml no encontrado, generando..."; pnpm install --no-frozen-lockfile; fi
       - pnpm install --frozen-lockfile
 
   build:
@@ -15,7 +16,7 @@ phases:
 
   post_build:
     commands:
-      - echo "Preparing deployment..."
+      - echo "📦 Preparando artefactos para despliegue..."
       - mkdir -p deploy
       - cp -r dist prisma node_modules package.json pnpm-lock.yaml Procfile deploy/
       - cd deploy && zip -r ../deploy.zip . && cd ..
