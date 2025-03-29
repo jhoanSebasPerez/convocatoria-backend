@@ -10,9 +10,9 @@ phases:
     commands:
       - pnpm prisma generate
       - pnpm build
+  post_build:
+    commands:
+      - pnpm prisma migrate deploy
 artifacts:
   files:
     - '**/*'
-
-
-
