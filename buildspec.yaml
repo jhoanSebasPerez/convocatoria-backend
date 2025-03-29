@@ -12,6 +12,7 @@ phases:
   build:
     commands:
       - pnpm prisma generate
+      - pnpm prisma migrate deploy
       - pnpm build
 
 artifacts:
