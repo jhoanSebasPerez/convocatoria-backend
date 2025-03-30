@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from "@nestjs/common";
+import { Controller, Post, Body, Get, Param, Logger } from "@nestjs/common";
 import { EvaluacionesService } from "./evaluaciones.service";
 import { EvaluacionDto } from "./dtos/evaluacion.dto";
 import { User } from "@prisma/client";
@@ -8,11 +8,15 @@ import { GetUser } from "src/auth/decorators/get-user.decorator";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
+    private readonly logger = new Logger(EvaluacionesController.name);
+
     constructor(private readonly evaluacionesService: EvaluacionesService) { }
 
     @Post()
     @Auth(ValidRoles.DOCENTE)
     async crearEvaluacion(@Body() dto: EvaluacionDto, @GetUser() evaluador: User) {
+        this.logger.log(`Creando evaluación: ${JSON.stringify(dto)}`);
+        this.logger.log(`Evaluador: ${JSON.stringify(evaluador)}`);
         return this.evaluacionesService.crearEvaluacion(dto, evaluador);
     }
 
