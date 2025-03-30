@@ -16,6 +16,7 @@ phases:
   post_build:
     commands:
       - echo "Build completo. Preparando archivos para despliegue."
+      - pwd
       - ls -la dist
 
 artifacts:
