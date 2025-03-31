@@ -149,14 +149,14 @@ async function main() {
     await prisma.evaluacion.create({
         data: {
             proyectoId: proyectoAula.id,
-            rubricaId: rubrica.id,
+            rubricaId: rubrica1.id,
             puntajeTotal: 18,
             observaciones: "Buen trabajo, pero necesita más detalles técnicos.",
             evaluadorId: docente.id,
             criteriosEvaluacion: {
                 create: [
-                    { criterioId: rubrica.criterios[0].id, puntaje: 9 },
-                    { criterioId: rubrica.criterios[1].id, puntaje: 9 },
+                    { criterioId: rubrica1.criterios[0].id, puntaje: 9 },
+                    { criterioId: rubrica1.criterios[1].id, puntaje: 9 },
                 ],
             },
         },
