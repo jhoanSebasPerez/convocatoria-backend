@@ -53,7 +53,7 @@ async function main() {
     });
 
     // 🔹 Crear una Rúbrica con Criterios
-    const rubrica = await prisma.rubrica.create({
+    const rubrica1 = await prisma.rubrica.create({
         data: {
             nombre: "Rúbrica General",
             descripcion: "Rúbrica para evaluación de proyectos",
@@ -61,6 +61,20 @@ async function main() {
                 create: [
                     { nombre: "Originalidad", puntajeMax: 10, puntajeMin: 5, descripcion: "Evalúa la originalidad" },
                     { nombre: "Impacto", puntajeMax: 10, puntajeMin: 5, descripcion: "Evalúa el impacto del proyecto" },
+                ],
+            },
+        },
+        include: { criterios: true },
+    });
+
+    const rubrica2 = await prisma.rubrica.create({
+        data: {
+            nombre: "Rúbrica Específica",
+            descripcion: "Rúbrica para evaluación de proyectos específicos",
+            criterios: {
+                create: [
+                    { nombre: "Viabilidad", puntajeMax: 10, puntajeMin: 5, descripcion: "Evalúa la viabilidad del proyecto" },
+                    { nombre: "Sostenibilidad", puntajeMax: 10, puntajeMin: 5, descripcion: "Evalúa la sostenibilidad del proyecto" },
                 ],
             },
         },
@@ -75,7 +89,7 @@ async function main() {
             fechaInicio: new Date("2025-01-01"),
             fechaFin: new Date("2025-12-31"),
             isActive: true,
-            rubricaId: rubrica.id,
+            rubricaId: rubrica1.id,
         },
     });
 
@@ -86,7 +100,7 @@ async function main() {
             fechaInicio: new Date("2025-03-01"),
             fechaFin: new Date("2025-10-31"),
             isActive: true,
-            rubricaId: rubrica.id,
+            rubricaId: rubrica2.id,
         },
     });
 
