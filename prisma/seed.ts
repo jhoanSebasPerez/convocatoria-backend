@@ -53,8 +53,10 @@ async function main() {
     });
 
     // 🔹 Crear una Rúbrica con Criterios
-    const rubrica1 = await prisma.rubrica.create({
-        data: {
+    const rubrica1 = await prisma.rubrica.upsert({
+        where: { nombre: "Rúbrica General" },
+        update: {}, // No actualizar nada si ya existe
+        create: {
             nombre: "Rúbrica General",
             descripcion: "Rúbrica para evaluación de proyectos",
             criterios: {
@@ -67,8 +69,10 @@ async function main() {
         include: { criterios: true },
     });
 
-    const rubrica2 = await prisma.rubrica.create({
-        data: {
+    const rubrica2 = await prisma.rubrica.upsert({
+        where: { nombre: "Rúbrica Específica" },
+        update: {},
+        create: {
             nombre: "Rúbrica Específica",
             descripcion: "Rúbrica para evaluación de proyectos específicos",
             criterios: {
