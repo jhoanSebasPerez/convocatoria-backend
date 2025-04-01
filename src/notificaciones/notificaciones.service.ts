@@ -66,4 +66,28 @@ export class NotificationService {
         });
     }
 
+    async enviarEmailCreacionEstudiante(user: User, token: string) {
+        const firstName = user.fullname ? user.fullname.split(' ')[0] : '';
+        const lastName = user.fullname ? user.fullname.split(' ')[1] : '';
+
+        await this.novu.trigger({
+            workflowId: 'convocatoria-registration-user',
+            to: {
+                subscriberId: user.id,
+                email: user.email,
+                firstName: firstName,
+                lastName: lastName
+            },
+            payload: {
+                fullname: user.fullname,
+                verification_link: `${this.configService.get('FRONTEND_URL')}/verify/${token}`
+            },
+            overrides: {
+                email: {
+                    senderName: "Convocatoria UFPS"
+                }
+            }
+        });
+    }
+
 }

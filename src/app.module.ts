@@ -15,9 +15,14 @@ import { ReportesModule } from './reportes/reportes.module';
 import { HealthController } from './health.controller';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 
-
 @Module({
   imports: [
+    ConfigModule.forRoot(
+      {
+        isGlobal: true,
+        envFilePath: ".env"
+      }
+    ),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -39,7 +44,6 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
       },
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot(),
     UserModule,
     AuthModule,
     ConvocatoriasModule,
@@ -48,7 +52,6 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     RubricasModule,
     CriteriosModule,
     UploadModule,
-    EvaluacionesModule,
     EvaluacionesModule,
     NotificacionesModule,
     ReportesModule,

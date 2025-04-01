@@ -23,12 +23,10 @@ export class AuthService {
             expires.getMilliseconds() + ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as StringValue)
         );
 
-        const payloadToken = { userId: user.id }
-
-        const token = this.jwtService.sign(payloadToken);
+        const token = await this.generateAccessToken(user);
 
         const userFromDb = await this.prisma.user.findUnique({
-            where: { id: user.id }
+            where: { id: user.id, isActive: true }
         });
 
         if (!userFromDb) {
@@ -44,6 +42,32 @@ export class AuthService {
         });
 
         return { token, expires };
+    }
+
+    async verifyAccessToken(token: string) {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                accessToken: token,
+                accessTokenExpires: {
+                    gte: new Date()
+                }
+            }
+        });
+
+        if (!user) {
+            throw new UnauthorizedException("Invalid token");
+        }
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                accessToken: null,
+                accessTokenExpires: null,
+                isActive: true
+            }
+        });
+
+        return { "success": true, "message": "Token is valid" };
     }
 
     async validateUser(email: string, password: string) {
@@ -62,6 +86,11 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+    }
+
+    async generateAccessToken(user: User) {
+        const payloadToken = { userId: user.id }
+        return this.jwtService.sign(payloadToken);
     }
 
     async logout(user: User) {

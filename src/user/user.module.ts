@@ -4,11 +4,13 @@ import { UserController } from './user.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { NotificacionesModule } from 'src/notificaciones/notificaciones.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   imports: [
+    JwtModule,
     PrismaModule,
     NotificacionesModule,
     forwardRef(() => AuthModule),

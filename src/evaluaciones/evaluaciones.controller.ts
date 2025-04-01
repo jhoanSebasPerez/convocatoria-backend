@@ -17,6 +17,7 @@ export class EvaluacionesController {
     async crearEvaluacion(@Body() dto: EvaluacionDto, @GetUser() evaluador: User) {
         this.logger.log(`Creando evaluación: ${JSON.stringify(dto)}`);
         this.logger.log(`Evaluador: ${JSON.stringify(evaluador)}`);
+        console.log("Entro en el controlador de evaluaciones");
         return this.evaluacionesService.crearEvaluacion(dto, evaluador);
     }
 

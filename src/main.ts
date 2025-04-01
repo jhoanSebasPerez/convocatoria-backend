@@ -11,9 +11,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useLogger(app.get(Logger));
 
+  const isDev = app.get(ConfigService).get('DEV');
+
   app.enableCors({
     origin: [
-      process.env.FRONTEND_URL,
+      isDev ? "http://localhost:3000" : process.env.FRONTEND_URL,
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

@@ -6,6 +6,8 @@ import { Prisma } from '@prisma/client';
 import { NotificationService } from 'src/notificaciones/notificaciones.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import ms, { StringValue } from 'ms';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -14,21 +16,41 @@ export class UserService {
     private readonly prismaService: PrismaService,
     private readonly notificacionesService: NotificationService,
     private readonly authService: AuthService,
+    private readonly configService: ConfigService
   ) { }
 
   async createUser(createUserDto: CreateUserDto) {
     try {
-      await this.prismaService.user.create({
+      const newUser = await this.prismaService.user.create({
         data: {
           ...createUserDto,
+          isActive: false,
+          roles: ['ESTUDIANTE'],
           password: await bcrypt.hash(createUserDto.password, 10),
-        },
-        select: {
-          id: true,
-          email: true,
-          fullname: true,
-        },
+        }
       });
+
+      // 🔹 Generar token de acceso y expiración
+      const token = await this.authService.generateAccessToken(newUser);
+
+      // 🔹 Actualizar el usuario con el token y la fecha de expiración
+      const expires = new Date();
+      expires.setMilliseconds(
+        expires.getMilliseconds() + ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as StringValue)
+      );
+
+      await this.prismaService.user.update({
+        where: { id: newUser.id },
+        data: {
+          accessToken: token,
+          accessTokenExpires: expires // 1 hora
+        }
+      });
+
+      //enviar email de activación
+      this.notificacionesService.enviarEmailCreacionEstudiante(newUser, token);
+
+      return { "success": true, message: 'Usuario creado exitosamente' };
 
     } catch (error) {
       console.error("🔥 Prisma error:", error); // 👀 Log para debug

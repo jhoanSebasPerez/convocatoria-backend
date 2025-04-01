@@ -45,4 +45,11 @@ export class AuthController {
         res.clearCookie("Authentication");
         res.status(HttpStatus.OK).json({ success: true });
     }
+
+    @Post('verify-token')
+    async verifyToken(
+        @Body('accessToken') token: string
+    ) {
+        return this.authService.verifyAccessToken(token);
+    }
 }
