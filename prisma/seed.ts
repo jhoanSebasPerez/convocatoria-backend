@@ -22,6 +22,7 @@ async function main() {
             fullname: "Admin General",
             roles: ["ADMIN"],
             password: bcrypt.hashSync("admin123", 10),
+            isActive: true
         },
     });
 
@@ -31,6 +32,7 @@ async function main() {
             fullname: "Docente Ejemplo",
             roles: ["DOCENTE"],
             password: bcrypt.hashSync("docente123", 10),
+            isActive: true
         },
     });
 
@@ -40,6 +42,7 @@ async function main() {
             fullname: "Estudiante 1",
             roles: ["ESTUDIANTE"],
             password: bcrypt.hashSync("estudiante123", 10),
+            isActive: true
         },
     });
 
@@ -49,6 +52,7 @@ async function main() {
             fullname: "Estudiante 2",
             roles: ["ESTUDIANTE"],
             password: bcrypt.hashSync("estudiante123", 10),
+            isActive: true
         },
     });
 
