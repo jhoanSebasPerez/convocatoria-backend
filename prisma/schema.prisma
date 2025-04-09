@@ -38,7 +38,7 @@ model Convocatoria {
 
   proyectos Proyecto[]
 
-  rubricaId String?  @unique
+  rubricaId String?
   rubrica   Rubrica? @relation(fields: [rubricaId], references: [id])
 
   createdAt DateTime @default(now())
