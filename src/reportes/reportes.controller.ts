@@ -42,9 +42,8 @@ export class ReportesController {
 
         // Extraer componentes de la fecha de fin y crear con hora actual
         const [anioFin, mesFin, diaFin] = datos.fechaFin.split('-').map(Number);
-        const horaActual = new Date();
         const fechaFinLocal = new Date(anioFin, mesFin - 1, diaFin,
-            horaActual.getHours(), horaActual.getMinutes(), horaActual.getSeconds(), 0);
+            23, 59, 59, 0);
 
         // Formatear fechas en formato ISO para que incluyan la información correcta de zona horaria
         const fechaInicioISO = fechaInicioLocal.toISOString();
