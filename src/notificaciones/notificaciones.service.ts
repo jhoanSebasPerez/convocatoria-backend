@@ -33,7 +33,12 @@ export class NotificationService {
                 payload: {
                     mensajeNotificacion: message,
                     tituloProyecto: title,
-                    urlAccion: actionUrl
+                    urlAccion: `${this.configService.get('FRONTEND_URL')}${actionUrl}`
+                },
+                overrides: {
+                    email: {
+                        senderName: "Convocatoria UFPS"
+                    }
                 }
             });
 

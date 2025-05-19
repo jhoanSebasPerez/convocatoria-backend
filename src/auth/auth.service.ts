@@ -18,10 +18,8 @@ export class AuthService {
     ) { }
 
     async login(user: User) {
-        const expires = new Date();
-        expires.setMilliseconds(
-            expires.getMilliseconds() + ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as StringValue)
-        );
+
+        const expires = this.getExpires();
 
         const token = await this.generateAccessToken(user);
 
@@ -43,6 +41,15 @@ export class AuthService {
 
         return { token, expires };
     }
+
+    getExpires() {
+        const expires = new Date();
+        expires.setMilliseconds(
+            expires.getMilliseconds() + ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as StringValue)
+        );
+        return expires;
+    }
+
 
     async verifyAccessToken(token: string) {
         const user = await this.prisma.user.findFirst({

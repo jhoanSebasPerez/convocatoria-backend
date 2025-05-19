@@ -116,7 +116,8 @@ export class UserService {
       },
     });
 
-    const { token, expires } = await this.authService.login(newUser);
+    const expires = this.authService.getExpires();
+    const token = await this.authService.generateAccessToken(newUser);
 
     await this.prismaService.user.update({
       where: { id: newUser.id },
